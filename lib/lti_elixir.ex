@@ -1,6 +1,6 @@
 defmodule LtiElixir do
   @moduledoc """
-  Documentation for LtiElixir.
+  A library to launch a LTI request
   """
   alias LtiElixir.Credentials
 
@@ -8,7 +8,7 @@ defmodule LtiElixir do
     %Credentials{url: url, key: key, secret: secret}
   end
 
-  def oauth_params(%Credentials{key: key} = creds) do
+  def oauth_params(%Credentials{key: key}) do
     [
       lti_version: "LTI-1p0",
       lti_message_type: "basic-lti-launch-request",
@@ -21,8 +21,8 @@ defmodule LtiElixir do
     ] ++ extra_data()
   end
 
-  def extra_data() do
-    launch_data = [
+  def extra_data do
+    [
       user_id: "292832126",
       roles: "Instructor",
       resource_link_id: "120988f929-274612",
@@ -43,35 +43,35 @@ defmodule LtiElixir do
   end
 
   def launch_params(params) do
-    launch_data = Enum.reduce(params, %{}, fn(data, acc)->
-      {key, value} = data
-      acc = Map.put(acc, key,  value)
+    launch_data = Enum.reduce(params, %{}, fn({key, value}, acc) ->
+      Map.put(acc, key,  value)
     end)
 
-    Enum.reduce(launch_data, [], fn(item, acc)->
-      {key, value} = item
+    Enum.reduce(launch_data, [], fn({key, value}, acc) ->
       acc ++ ["#{key}=#{percent_encode(value)}"]
     end)
   end
 
-  def base_string(%Credentials{url: url} = creds) do
-    query =  oauth_params(creds)
-             |> launch_params()
-             |> Enum.join("&")
-             |> percent_encode()
-    "POST&#{percent_encode(url)}&#{query}"
-  end
-
   def signature(%Credentials{secret: secret} = creds) do
-    :crypto.hmac(:sha, encode_secret(secret), base_string(creds)) |> Base.encode64()
+    :sha
+    |> :crypto.hmac(encode_secret(secret), base_string(creds))
+    |> Base.encode64()
   end
 
   defp encode_secret(secret) do
     "#{percent_encode(secret)}&"
   end
 
+  defp base_string(%Credentials{url: url} = creds) do
+    query =  creds
+             |> oauth_params()
+             |> launch_params()
+             |> Enum.join("&")
+             |> percent_encode()
+    "POST&#{percent_encode(url)}&#{query}"
+  end
 
-  defp timestamp() do
+  defp timestamp do
     {megasec, sec, _mcs} = :os.timestamp
     "#{megasec * 1_000_000 + sec}"
   end
@@ -81,7 +81,8 @@ defmodule LtiElixir do
   end
 
   defp percent_encode(other) do
-    to_string(other)
+    other
+    |> to_string()
     |> URI.encode(&URI.char_unreserved?/1)
   end
 end

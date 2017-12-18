@@ -1,4 +1,4 @@
-defmodule LtiElixir.OAuthData do
+defmodule LTI.OAuthData do
   @moduledoc """
   A struct to define the OAuth credentials to be passed around
   """

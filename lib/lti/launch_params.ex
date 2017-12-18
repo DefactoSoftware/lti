@@ -1,4 +1,4 @@
-defmodule LtiElixir.LaunchParams do
+defmodule LTI.LaunchParams do
   @moduledoc """
   A struct to define the elements that are needed to process most functions
   """

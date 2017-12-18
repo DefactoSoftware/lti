@@ -1,8 +1,8 @@
-defmodule LtiElixir do
+defmodule LTI do
   @moduledoc """
   A library to launch a LTI request
   """
-  alias LtiElixir.{Credentials, OAuthData, LaunchParams}
+  alias LTI.{Credentials, OAuthData, LaunchParams}
 
   def credentials(url, key, secret) do
     %Credentials{url: url, key: key, secret: secret}
@@ -29,7 +29,10 @@ defmodule LtiElixir do
 
   def signature(%Credentials{secret: secret} = creds, oauth_params, launch_params) do
     :sha
-    |> :crypto.hmac(encode_secret(secret), base_string(creds, oauth_params, launch_params))
+    |> :crypto.hmac(
+      encode_secret(secret),
+      base_string(creds, oauth_params, launch_params)
+    )
     |> Base.encode64()
   end
 
@@ -37,7 +40,7 @@ defmodule LtiElixir do
     "#{percent_encode(secret)}&"
   end
 
-  defp base_string(%Credentials{url: url} = creds, oauth_params, launch_params) do
+  defp base_string(%Credentials{url: url}, oauth_params, launch_params) do
     query = oauth_params
             |> launch_data(launch_params)
             |> Enum.join("&")

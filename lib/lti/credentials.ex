@@ -1,4 +1,4 @@
-defmodule LtiElixir.Credentials do
+defmodule LTI.Credentials do
   @moduledoc """
   A struct to define the elements that are needed to process most functions
   """

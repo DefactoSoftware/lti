@@ -1,8 +1,8 @@
-defmodule LtiElixirTest do
+defmodule LTITest do
   use ExUnit.Case
-  doctest LtiElixir
+  doctest LTI
 
-  alias LtiElixir.{Credentials, LaunchParams}
+  alias LTI.{Credentials, LaunchParams}
 
   @valid_launch_params %LaunchParams{
     context_id: "28938320",
@@ -18,7 +18,7 @@ defmodule LtiElixirTest do
 
   test "launch_data/2 contains all needed params" do
     creds = %Credentials{url: "exmaple.com", secret: "secret", key: "key"}
-    oauth_params = LtiElixir.oauth_params(creds)
-    LtiElixir.launch_data(oauth_params, @valid_launch_params)
+    oauth_params = LTI.oauth_params(creds)
+    LTI.launch_data(oauth_params, @valid_launch_params)
   end
 end

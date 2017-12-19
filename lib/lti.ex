@@ -20,8 +20,15 @@ defmodule LTI do
   end
 
   def launch_data(%OAuthData{} = oauth, %LaunchParams{} = launch_params) do
-    struct_to_list(oauth) ++ struct_to_list(launch_params)
-    |> Enum.reduce(%{}, fn({key, value}, acc) -> Map.put(acc, key,  value) end)
+    struct_to_list(launch_params) ++ struct_to_list(oauth)
+  end
+
+  def launch_query(%OAuthData{} = oauth, %LaunchParams{} = launch_params) do
+    oauth
+    |> launch_data(launch_params)
+    |> Enum.reduce(%{}, fn({key, value}, acc) ->
+      Map.put(acc, key,  value)
+    end)
     |> Enum.reduce([], fn({key, value}, acc) ->
       acc ++ ["#{key}=#{percent_encode(value)}"]
     end)
@@ -42,7 +49,7 @@ defmodule LTI do
 
   defp base_string(%Credentials{url: url}, oauth_params, launch_params) do
     query = oauth_params
-            |> launch_data(launch_params)
+            |> launch_query(launch_params)
             |> Enum.join("&")
             |> percent_encode()
     "POST&#{percent_encode(url)}&#{query}"
@@ -63,5 +70,17 @@ defmodule LTI do
     |> URI.encode(&URI.char_unreserved?/1)
   end
 
-  defp struct_to_list(struct), do: struct |> Map.from_struct() |> Map.to_list()
+  defp struct_to_list(struct),
+    do: struct
+        |> Map.from_struct()
+        |> Map.to_list()
+        |> strip_nil()
+
+  defp strip_nil(list) do
+    Enum.reduce(list, [], fn ({_, value} = item, acc) ->
+      if is_nil(value),
+        do: acc,
+        else: acc ++ [item]
+    end)
+  end
 end

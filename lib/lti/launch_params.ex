@@ -9,7 +9,9 @@ defmodule LTI.LaunchParams do
     :resource_link_id,
     :roles,
     :tool_consumer_instance_guid,
-    :user_id
+    :user_id,
+    :lti_message_type,
+    :lti_version
   ]
 
   defstruct [
@@ -29,13 +31,6 @@ defmodule LTI.LaunchParams do
     :lis_result_sourcedid,
     :lti_message_type,
     :lti_version,
-    :oauth_callback,
-    :oauth_consumer_key,
-    :oauth_nonce,
-    :oauth_signature,
-    :oauth_signature_method,
-    :oauth_timestamp,
-    :oauth_version,
     :resource_link_description,
     :resource_link_id,
     :resource_link_title,
@@ -44,6 +39,7 @@ defmodule LTI.LaunchParams do
     :tool_consumer_info_version,
     :tool_consumer_instance_description,
     :tool_consumer_instance_guid,
-    :user_id
+    :user_id,
+    :submit
   ]
 end

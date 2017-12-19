@@ -9,7 +9,7 @@ add
 ```ex
 def deps do
   [
-    {:lti, git: "https://github.com/fatboypunk/lti"}
+    {:lti, git: "https://github.com/defactosoftware/lti"}
   ]
 end
 ```

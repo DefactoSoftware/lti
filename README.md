@@ -1,21 +1,15 @@
-# LtiElixir
+# LTI for elixir
 
-**TODO: Add description**
+A package to easily configure the launch button for LTI modules.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `lti_elixir` to your list of dependencies in `mix.exs`:
+add
 
-```elixir
+```ex
 def deps do
   [
-    {:lti_elixir, "~> 0.1.0"}
+    {:lti, git: "https://github.com/defactosoftware/lti"}
   ]
 end
 ```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/lti_elixir](https://hexdocs.pm/lti_elixir).
-

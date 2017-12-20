@@ -1,4 +1,4 @@
-defmodule LtiElixir.LaunchParams do
+defmodule LTI.LaunchParams do
   @moduledoc """
   A struct to define the elements that are needed to process most functions
   """
@@ -9,7 +9,9 @@ defmodule LtiElixir.LaunchParams do
     :resource_link_id,
     :roles,
     :tool_consumer_instance_guid,
-    :user_id
+    :user_id,
+    :lti_message_type,
+    :lti_version
   ]
 
   defstruct [
@@ -29,13 +31,6 @@ defmodule LtiElixir.LaunchParams do
     :lis_result_sourcedid,
     :lti_message_type,
     :lti_version,
-    :oauth_callback,
-    :oauth_consumer_key,
-    :oauth_nonce,
-    :oauth_signature,
-    :oauth_signature_method,
-    :oauth_timestamp,
-    :oauth_version,
     :resource_link_description,
     :resource_link_id,
     :resource_link_title,
@@ -44,6 +39,7 @@ defmodule LtiElixir.LaunchParams do
     :tool_consumer_info_version,
     :tool_consumer_instance_description,
     :tool_consumer_instance_guid,
-    :user_id
+    :user_id,
+    :submit
   ]
 end

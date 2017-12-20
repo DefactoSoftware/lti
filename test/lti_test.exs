@@ -23,7 +23,7 @@ defmodule LTITest do
     creds = %Credentials{url: "exmaple.com", secret: "secret", key: "key"}
     oauth_params = LTI.oauth_params(creds)
     launch_data = LTI.launch_data(oauth_params, @valid_launch_params)
-    assert  "roles=student" in launch_data
-    assert  "oauth_signature_method=HMAC-SHA1" in launch_data
+    assert "roles=student" in launch_data
+    assert "oauth_signature_method=HMAC-SHA1" in launch_data
   end
 end

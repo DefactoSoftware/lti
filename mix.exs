@@ -4,21 +4,36 @@ defmodule LTI.Mixfile do
   def project do
     [
       app: :lti,
-      version: "0.0.1",
+      deps: deps(),
+      description: description(),
       elixir: "~> 1.5",
+      name: "LTI",
+      package: package(),
+      source_url: "https://github.com/defactosoftware/lti",
       start_permanent: Mix.env == :prod,
-      deps: deps()
+      version: "0.0.1"
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
-  def application do
+  defp description do
+  """
+  A module to easily launch LTI modules.
+  """
+  end
+
+  defp package do
     [
-      extra_applications: [:logger]
+      name: :lti,
+      maintainers: ["Marcel Horlings"],
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/defactosoftware/lti"}
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
+  def application do
+    []
+  end
+
   defp deps do
     [
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false},

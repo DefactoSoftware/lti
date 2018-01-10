@@ -9,16 +9,17 @@ defmodule LTI.Mixfile do
       elixir: "~> 1.5",
       name: "LTI",
       package: package(),
+      elixirc_paths: ["lib"],
       source_url: "https://github.com/defactosoftware/lti",
-      start_permanent: Mix.env == :prod,
-      version: "0.0.1"
+      start_permanent: true,
+      version: "0.0.2"
     ]
   end
 
   defp description do
-  """
-  A module to easily launch LTI modules.
-  """
+    """
+    A module to easily launch LTI modules.
+    """
   end
 
   defp package do

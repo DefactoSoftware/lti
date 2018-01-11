@@ -18,3 +18,8 @@ jobs:
             - v1-mix-deps-{{ checksum "mix.lock" }}
       - run: mix deps.get
       - run: mix credo --strict
+      - save_cache:
+          key: v1-mix-deps-{{ checksum "mix.lock" }}
+          paths:
+            - "deps"
+            - "_build"

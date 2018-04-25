@@ -9,7 +9,7 @@ add
 ```ex
 def deps do
   [
-    {:lti, "~> 0.0.2"}
+    {:lti, "~> 0.0.3"}
   ]
 end
 ```

@@ -8,15 +8,19 @@ defmodule LTIResult do
   of the application's endpoint used by the providers to send the request,
   the oauth parameters used to construct the base string, and the secret of
   the corresponding LTI provider. The parameters are expected to be a list of tuples
-  containing a key and corresponding value.
+  containing a key and corresponding value. The result is a percent encoded signature.
 
   ## Examples
 
-      iex> signature("POST",
-                     "https://example.com",
-                     [{"key_1", "value_1"}, {"key_2", "value_2"}],
-                     "stored_secret")
-      {:ok, "b1ZRZdHX7947RtX1jbvdZ0Ibmlg"}
+      iex> signature("post",
+      "https://example.com",
+      [{"oauth_consumer_key", "key1234"},
+      {"oauth_signature_method", "HMAC-SHA1"},
+      {"oauth_timestamp", "1525076552"},
+      {"oauth_nonce", "123"},
+      {"oauth_version", "1.0"}],
+      "random_secret")
+      {:ok, "iyyQNRQyXTlpLJPJns3ireWjQxo%3D"}
   """
   def signature(method, url, parameters, secret) do
     basestring = base_string(method, url, parameters)
@@ -29,7 +33,7 @@ defmodule LTIResult do
       )
       |> Base.encode64()
 
-    {:ok, signature}
+    {:ok, percent_encode(signature)}
   end
 
   defp base_string(method, url, parameters) do

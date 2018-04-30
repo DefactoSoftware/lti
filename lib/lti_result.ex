@@ -2,6 +2,13 @@ defmodule LTIResult do
   @moduledoc """
   Module to handle incoming HTTP requests from LTI Providers
   """
+  @required_parameters [
+    "oauth_consumer_key",
+    "oauth_signature_method",
+    "oauth_timestamp",
+    "oauth_nonce",
+    "oauth_version"
+  ]
 
   @doc """
   Determines a signature using the HTTP method of the request, the url
@@ -22,18 +29,94 @@ defmodule LTIResult do
       "random_secret")
       {:ok, "iyyQNRQyXTlpLJPJns3ireWjQxo%3D"}
   """
-  def signature(method, url, parameters, secret) do
-    basestring = base_string(method, url, parameters)
+  def signature(method, url, oauth_header, secret) do
+    {parameters, received_signature} =
+      oauth_string
+      |> String.trim_leading("OAuth ")
+      |> String.split(",")
+      |> to_key_value()
+      |> trim_values()
+      |> extract_signature()
 
-    signature =
-      :sha
-      |> :crypto.hmac(
-        percent_encode(secret) <> "&",
-        basestring
-      )
-      |> Base.encode64()
+    with {:ok, _} <- validate_parameters(parameters) do
+      basestring = base_string(method, url, parameters)
 
-    {:ok, percent_encode(signature)}
+      signature =
+        :sha
+        |> :crypto.hmac(
+          percent_encode(secret) <> "&",
+          basestring
+        )
+        |> Base.encode64()
+
+      {:ok, percent_encode(signature)}
+    end
+  end
+
+  defp validate_parameters(parameters) do
+    {_, state} =
+      {parameters, []}
+      |> validate_oauth_version()
+      |> validate_duplication()
+      |> validate_required()
+      |> validate_supported()
+
+    case state do
+      [] -> {:ok, parameters}
+      _ -> {:error, state}
+    end
+  end
+
+  defp validate_oauth_version({parameters, state}) do
+    cond do
+      List.keytake(parameters, "oauth_version", 0) == "1.0" ->
+        {parameters, state}
+
+      true ->
+        {parameters, :incorrect_version ++ state}
+    end
+  end
+
+  defp validate_duplication({parameters, state}) do
+    cond do
+      duplicated_elements?(parameters) ->
+        {parameters, :duplicated_parameters ++ state}
+
+      true ->
+        {parameters, state}
+    end
+  end
+
+  defp duplicated_elements([head | tail], existing_elements \\ []) do
+    if head in exisiting_elements do
+      true
+    else
+      duplicated_elements(tail, head ++ existing_elements)
+    end
+  end
+
+  defp validate_required({parameters, state}) do
+    cond do
+      Enum.all?(@required_parameters, fn required_parameter ->
+        required_parameter in parameters
+      end) ->
+        {parameters, state}
+
+      true ->
+        {parameters, :mising_required_parameters ++ state}
+    end
+  end
+
+  defp validate_supported({parameters, state}) do
+    cond do
+      Enum.all?(parameters, fn {key, _} ->
+        String.starts_with?(key, "oath_")
+      end) ->
+        {parameters, state}
+
+      true ->
+        {parameters, :unsupported_parameters ++ state}
+    end
   end
 
   defp base_string(method, url, parameters) do
@@ -66,5 +149,24 @@ defmodule LTIResult do
     other
     |> to_string()
     |> URI.encode(&URI.char_unreserved?/1)
+  end
+
+  defp to_key_value(key_value_list) do
+    Enum.map(key_value_list, fn key_value ->
+      [key, value] = String.split(key_value, "=")
+      {key, value}
+    end)
+  end
+
+  defp trim_values(pairs) do
+    Enum.map(pairs, fn {key, value} ->
+      trimmed_key = String.trim(key)
+      trimmed_value = String.trim(value, "\"")
+      {trimmed_key, trimmed_value}
+    end)
+  end
+
+  defp extract_signature(key_value_pairs) do
+    {parameters, their_signature} = Enum.split(key_value_pairs, -1)
   end
 end

@@ -31,11 +31,12 @@ defmodule LTIResult do
   """
   def signature(method, url, oauth_header, secret) do
     {parameters, received_signature} =
-      oauth_string
+      oauth_header
       |> String.trim_leading("OAuth ")
       |> String.split(",")
       |> to_key_value()
       |> trim_values()
+      |> remove_realm()
       |> extract_signature()
 
     with {:ok, _} <- validate_parameters(parameters) do
@@ -69,53 +70,55 @@ defmodule LTIResult do
 
   defp validate_oauth_version({parameters, state}) do
     cond do
-      List.keytake(parameters, "oauth_version", 0) == "1.0" ->
+      List.keyfind(parameters, "oauth_version", 0) == {"oauth_version", "1.0"} ->
         {parameters, state}
 
       true ->
-        {parameters, :incorrect_version ++ state}
+        {parameters, state ++ [:incorrect_version]}
     end
   end
 
   defp validate_duplication({parameters, state}) do
     cond do
       duplicated_elements?(parameters) ->
-        {parameters, :duplicated_parameters ++ state}
+        {parameters, state ++ [:duplicated_parameters]}
 
       true ->
         {parameters, state}
     end
   end
 
-  defp duplicated_elements([head | tail], existing_elements \\ []) do
-    if head in exisiting_elements do
+  defp duplicated_elements?([], _), do: false
+
+  defp duplicated_elements?([head | tail], existing_elements \\ []) do
+    if head in existing_elements do
       true
     else
-      duplicated_elements(tail, head ++ existing_elements)
+      duplicated_elements?(tail, existing_elements ++ [head])
     end
   end
 
   defp validate_required({parameters, state}) do
     cond do
       Enum.all?(@required_parameters, fn required_parameter ->
-        required_parameter in parameters
+        required_parameter in Enum.map(parameters, fn {key, _} -> key end)
       end) ->
         {parameters, state}
 
       true ->
-        {parameters, :mising_required_parameters ++ state}
+        {parameters, state ++ [:missing_required_parameters]}
     end
   end
 
   defp validate_supported({parameters, state}) do
     cond do
       Enum.all?(parameters, fn {key, _} ->
-        String.starts_with?(key, "oath_")
+        String.starts_with?(key, "oauth_")
       end) ->
         {parameters, state}
 
       true ->
-        {parameters, :unsupported_parameters ++ state}
+        {parameters, state ++ [:unsupported_parameters]}
     end
   end
 
@@ -137,12 +140,11 @@ defmodule LTIResult do
   end
 
   defp normalized_string(sorted_elements) do
-    String.trim_leading(
-      Enum.reduce(sorted_elements, "", fn {key, value}, acc ->
-        acc <> "&" <> "#{key}" <> "=" <> "#{value}"
-      end),
-      "&"
-    )
+    sorted_elements
+    |> Enum.reduce("", fn {key, value}, acc ->
+      acc <> "&" <> "#{key}" <> "=" <> "#{value}"
+    end)
+    |> String.trim_leading("&")
   end
 
   defp percent_encode(other) do
@@ -168,5 +170,9 @@ defmodule LTIResult do
 
   defp extract_signature(key_value_pairs) do
     {parameters, their_signature} = Enum.split(key_value_pairs, -1)
+  end
+
+  defp remove_realm(key_value_pairs) do
+    List.keydelete(parameters, "realm", 0)
   end
 end

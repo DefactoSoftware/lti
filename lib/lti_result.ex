@@ -87,13 +87,17 @@ defmodule LTIResult do
   end
 
   defp validate_required({parameters, state}) do
-    if Enum.all?(@required_oauth_parameters, fn required_parameter ->
-         required_parameter in Enum.map(parameters, fn {key, _} -> key end)
-       end) do
+    if check_for_required_parameters(parameters) do
       {parameters, state}
     else
       {parameters, state ++ [:missing_required_parameters]}
     end
+  end
+
+  defp check_for_required_parameters(parameters) do
+    Enum.all?(@required_oauth_parameters, fn required_parameter ->
+      required_parameter in Enum.map(parameters, fn {key, _} -> key end)
+    end)
   end
 
   defp validate_supported({parameters, state}) do
@@ -106,9 +110,10 @@ defmodule LTIResult do
     end
   end
 
+  defp duplicated_elements?(parameter_list, state \\ [])
   defp duplicated_elements?([], _), do: false
 
-  defp duplicated_elements?([head | tail], existing_elements \\ []) do
+  defp duplicated_elements?([head | tail], existing_elements) do
     if head in existing_elements do
       true
     else

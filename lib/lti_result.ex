@@ -2,7 +2,7 @@ defmodule LTIResult do
   @moduledoc """
   Module to handle incoming HTTP requests from LTI Providers
   """
-  @required_parameters [
+  @required_oauth_parameters [
     "oauth_consumer_key",
     "oauth_signature_method",
     "oauth_timestamp",
@@ -19,25 +19,12 @@ defmodule LTIResult do
 
   ## Examples
 
-      iex> signature("post",
-      "https://example.com",
-      [{"oauth_consumer_key", "key1234"},
-      {"oauth_signature_method", "HMAC-SHA1"},
-      {"oauth_timestamp", "1525076552"},
-      {"oauth_nonce", "123"},
-      {"oauth_version", "1.0"}],
-      "random_secret")
+      iex> LTIResult.signature("post", "https://example.com", "OAuth oauth_consumer_key=\"key1234\",oauth_signature_method=\"HMAC-SHA1\",oauth_timestamp=\"1525076552\",oauth_nonce=\"123\",oauth_version=\"1.0\",oauth_signature=\"iyyQNRQyXTlpLJPJns3ireWjQxo%3D\"", "random_secret")
       {:ok, "iyyQNRQyXTlpLJPJns3ireWjQxo%3D"}
   """
   def signature(method, url, oauth_header, secret) do
-    {parameters, received_signature} =
-      oauth_header
-      |> String.trim_leading("OAuth ")
-      |> String.split(",")
-      |> to_key_value()
-      |> trim_values()
-      |> remove_realm()
-      |> extract_signature()
+    {parameters, [{"oauth_signature", received_signature}]} =
+      extract_header_elements(oauth_header)
 
     with {:ok, _} <- validate_parameters(parameters) do
       basestring = base_string(method, url, parameters)
@@ -49,9 +36,24 @@ defmodule LTIResult do
           basestring
         )
         |> Base.encode64()
+        |> percent_encode()
 
-      {:ok, percent_encode(signature)}
+      if signature == received_signature do
+        {:ok, signature}
+      else
+        {:error, :unmatching_signatures}
+      end
     end
+  end
+
+  defp extract_header_elements(header) do
+    header
+    |> String.trim_leading("OAuth ")
+    |> String.split(",")
+    |> string_to_key_and_value()
+    |> trim_elements()
+    |> remove_realm_parameter()
+    |> extract_signature()
   end
 
   defp validate_parameters(parameters) do
@@ -69,22 +71,38 @@ defmodule LTIResult do
   end
 
   defp validate_oauth_version({parameters, state}) do
-    cond do
-      List.keyfind(parameters, "oauth_version", 0) == {"oauth_version", "1.0"} ->
-        {parameters, state}
-
-      true ->
-        {parameters, state ++ [:incorrect_version]}
+    if List.keyfind(parameters, "oauth_version", 0) == {"oauth_version", "1.0"} do
+      {parameters, state}
+    else
+      {parameters, state ++ [:incorrect_version]}
     end
   end
 
   defp validate_duplication({parameters, state}) do
-    cond do
-      duplicated_elements?(parameters) ->
-        {parameters, state ++ [:duplicated_parameters]}
+    if duplicated_elements?(parameters) do
+      {parameters, state ++ [:duplicated_parameters]}
+    else
+      {parameters, state}
+    end
+  end
 
-      true ->
-        {parameters, state}
+  defp validate_required({parameters, state}) do
+    if Enum.all?(@required_oauth_parameters, fn required_parameter ->
+         required_parameter in Enum.map(parameters, fn {key, _} -> key end)
+       end) do
+      {parameters, state}
+    else
+      {parameters, state ++ [:missing_required_parameters]}
+    end
+  end
+
+  defp validate_supported({parameters, state}) do
+    if Enum.all?(parameters, fn {key, _} ->
+         String.starts_with?(key, "oauth_")
+       end) do
+      {parameters, state}
+    else
+      {parameters, state ++ [:unsupported_parameters]}
     end
   end
 
@@ -98,34 +116,10 @@ defmodule LTIResult do
     end
   end
 
-  defp validate_required({parameters, state}) do
-    cond do
-      Enum.all?(@required_parameters, fn required_parameter ->
-        required_parameter in Enum.map(parameters, fn {key, _} -> key end)
-      end) ->
-        {parameters, state}
-
-      true ->
-        {parameters, state ++ [:missing_required_parameters]}
-    end
-  end
-
-  defp validate_supported({parameters, state}) do
-    cond do
-      Enum.all?(parameters, fn {key, _} ->
-        String.starts_with?(key, "oauth_")
-      end) ->
-        {parameters, state}
-
-      true ->
-        {parameters, state ++ [:unsupported_parameters]}
-    end
-  end
-
   defp base_string(method, url, parameters) do
     query_string =
       parameters
-      |> encode()
+      |> percent_encode_pairs()
       |> Enum.sort()
       |> normalized_string()
       |> percent_encode()
@@ -133,46 +127,44 @@ defmodule LTIResult do
     "#{percent_encode(String.upcase(method))}&#{percent_encode(url)}&" <> query_string
   end
 
-  defp encode(parameters) do
-    Enum.map(parameters, fn {key, value} ->
+  defp percent_encode_pairs(pairs) do
+    Enum.map(pairs, fn {key, value} ->
       {percent_encode(key), percent_encode(value)}
     end)
   end
 
-  defp normalized_string(sorted_elements) do
-    sorted_elements
+  defp normalized_string(sorted_pairs) when is_list(sorted_pairs) do
+    sorted_pairs
     |> Enum.reduce("", fn {key, value}, acc ->
       acc <> "&" <> "#{key}" <> "=" <> "#{value}"
     end)
     |> String.trim_leading("&")
   end
 
-  defp percent_encode(other) do
-    other
+  defp percent_encode(object) do
+    object
     |> to_string()
     |> URI.encode(&URI.char_unreserved?/1)
   end
 
-  defp to_key_value(key_value_list) do
-    Enum.map(key_value_list, fn key_value ->
-      [key, value] = String.split(key_value, "=")
+  defp string_to_key_and_value(key_value_strings) when is_list(key_value_strings) do
+    Enum.map(key_value_strings, fn key_value_string ->
+      [key, value] = String.split(key_value_string, "=")
       {key, value}
     end)
   end
 
-  defp trim_values(pairs) do
+  defp trim_elements(pairs) when is_list(pairs) do
     Enum.map(pairs, fn {key, value} ->
-      trimmed_key = String.trim(key)
-      trimmed_value = String.trim(value, "\"")
-      {trimmed_key, trimmed_value}
+      {String.trim(key), String.trim(value, "\"")}
     end)
   end
 
-  defp extract_signature(key_value_pairs) do
-    {parameters, their_signature} = Enum.split(key_value_pairs, -1)
+  defp extract_signature(pairs) do
+    Enum.split(pairs, -1)
   end
 
-  defp remove_realm(key_value_pairs) do
-    List.keydelete(parameters, "realm", 0)
+  defp remove_realm_parameter(pairs) when is_list(pairs) do
+    List.keydelete(pairs, "realm", 0)
   end
 end

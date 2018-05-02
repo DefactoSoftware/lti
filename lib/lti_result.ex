@@ -19,7 +19,7 @@ defmodule LTIResult do
 
   ## Examples
 
-      iex> LTIResult.signature("post", "https://example.com", "OAuth oauth_consumer_key=\"key1234\",oauth_signature_method=\"HMAC-SHA1\",oauth_timestamp=\"1525076552\",oauth_nonce=\"123\",oauth_version=\"1.0\",oauth_signature=\"iyyQNRQyXTlpLJPJns3ireWjQxo%3D\"", "random_secret")
+      iex> LTIResult.signature("post", "https://example.com", 'OAuth oauth_consumer_key="key1234",oauth_signature_method="HMAC-SHA1",oauth_timestamp="1525076552",oauth_nonce="123",oauth_version="1.0",oauth_signature="iyyQNRQyXTlpLJPJns3ireWjQxo%3D"', "random_secret")
       {:ok, "iyyQNRQyXTlpLJPJns3ireWjQxo%3D"}
   """
   def signature(method, url, oauth_header, secret) do
@@ -41,7 +41,7 @@ defmodule LTIResult do
       if signature == received_signature do
         {:ok, signature}
       else
-        {:error, :unmatching_signatures}
+        {:error, [:unmatching_signatures]}
       end
     end
   end

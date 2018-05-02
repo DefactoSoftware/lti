@@ -22,7 +22,7 @@ defmodule LTIResultTest do
         "random_secret"
       )
 
-    assert return == {:error, :unmatching_signatures}
+    assert return == {:error, [:unmatching_signatures]}
   end
 
   test "returns an error if the signature is incorrect due to difference in method" do
@@ -34,7 +34,7 @@ defmodule LTIResultTest do
         "random_secret"
       )
 
-    assert return == {:error, :unmatching_signatures}
+    assert return == {:error, [:unmatching_signatures]}
   end
 
   test "returns an error if the signature is incorrect due to difference in timestamp" do
@@ -46,7 +46,7 @@ defmodule LTIResultTest do
         "random_secret"
       )
 
-    assert return == {:error, :unmatching_signatures}
+    assert return == {:error, [:unmatching_signatures]}
   end
 
   test "returns an error if the signature is incorrect due to difference in nonce" do
@@ -58,7 +58,7 @@ defmodule LTIResultTest do
         "random_secret"
       )
 
-    assert return == {:error, :unmatching_signatures}
+    assert return == {:error, [:unmatching_signatures]}
   end
 
   test "returns an error if version is incorrect" do
@@ -143,5 +143,17 @@ defmodule LTIResultTest do
       )
 
     assert return == {:error, [:missing_required_parameters]}
+  end
+
+  test "returns an error if an unsupported parameter is provided" do
+    return =
+      LTIResult.signature(
+        "post",
+        "https://example.com",
+        "OAuth unsupported_derpvalue=\"123\",oauth_consumer_key=\"key1234\",oauth_signature_method=\"HMAC-SHA1\",oauth_timestamp=\"1525076552\",oauth_nonce=\"123\",oauth_version=\"1.0\",oauth_signature=\"iyyQNRQyXTlpLJPJns3ireWjQxo%3D\"",
+        "random_secret"
+      )
+
+    assert return == {:error, [:unsupported_parameters]}
   end
 end

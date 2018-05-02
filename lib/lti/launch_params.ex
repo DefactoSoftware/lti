@@ -8,7 +8,6 @@ defmodule LTI.LaunchParams do
     :launch_presentation_return_url,
     :resource_link_id,
     :roles,
-    :tool_consumer_instance_guid,
     :user_id,
     :lti_message_type,
     :lti_version

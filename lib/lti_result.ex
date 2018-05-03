@@ -20,28 +20,20 @@ defmodule LTIResult do
   ## Examples
 
       iex(0)> LTIResult.signature(
-      iex(0)>   "post",
       iex(0)>   "https://example.com",
       iex(0)>   ~S"OAuth oauth_consumer_key=\"key1234\",oauth_signature_method=\"HMAC-SHA1\",oauth_timestamp=\"1525076552\",oauth_nonce=\"123\",oauth_version=\"1.0\",oauth_signature=\"iyyQNRQyXTlpLJPJns3ireWjQxo%3D\"",
       iex(0)>   "random_secret"
       iex(0)> )
       {:ok, "iyyQNRQyXTlpLJPJns3ireWjQxo%3D"}
   """
-  def signature(method, url, oauth_header, secret) do
+  def signature(url, oauth_header, secret) do
     {parameters, [{"oauth_signature", received_signature}]} =
       extract_header_elements(oauth_header)
 
     with {:ok, _} <- validate_parameters(parameters) do
-      basestring = base_string(method, url, parameters)
+      basestring = base_string(url, parameters)
 
-      signature =
-        :sha
-        |> :crypto.hmac(
-          percent_encode(secret) <> "&",
-          basestring
-        )
-        |> Base.encode64()
-        |> percent_encode()
+      signature = generate_signature(secret, basestring)
 
       if signature == received_signature do
         {:ok, signature}
@@ -49,6 +41,16 @@ defmodule LTIResult do
         {:error, [:unmatching_signatures]}
       end
     end
+  end
+
+  defp generate_signature(secret, basestring) do
+    :sha
+    |> :crypto.hmac(
+      percent_encode(secret) <> "&",
+      basestring
+    )
+    |> Base.encode64()
+    |> percent_encode()
   end
 
   defp extract_header_elements(header) do
@@ -126,7 +128,9 @@ defmodule LTIResult do
     end
   end
 
-  defp base_string(method, url, parameters) do
+  defp base_string(url, parameters) do
+    encoded_url = percent_encode(url)
+
     query_string =
       parameters
       |> percent_encode_pairs()
@@ -134,7 +138,7 @@ defmodule LTIResult do
       |> normalized_string()
       |> percent_encode()
 
-    "#{percent_encode(String.upcase(method))}&#{percent_encode(url)}&" <> query_string
+    "POST&#{encoded_url}&" <> query_string
   end
 
   defp percent_encode_pairs(pairs) do

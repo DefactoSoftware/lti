@@ -14,7 +14,7 @@ def deps do
 end
 ```
 
-## Usage
+## Usage LTI Launch
 
 ```eex
 # in the template
@@ -61,4 +61,19 @@ launch_params = launch_params(@current_user_
       submit: "Launch"
     }
   end
+```
+
+## Usage LTI Receive
+Verify the received signature by passing the url, oauth header and secret.
+This function will either return an :ok tuple together with the verified signature or
+an :error tuple with a list with one or more of the error atoms (:unmatching_signatures, :incorrect_version, :duplicated_parameters, :missing_required_parameters or :unsupported_parameters)
+By default, the HTTP method is POST.
+
+```ex
+  {:ok, signature} =
+      LTIResult.signature(
+        "https://example.com",
+        "OAuth oauth_consumer_key=\"key1234\",oauth_signature_method=\"HMAC-SHA1\",oauth_timestamp=\"1525076552\",oauth_nonce=\"123\",oauth_version=\"1.0\",oauth_signature=\"iyyQNRQyXTlpLJPJns3ireWjQxo%3D\"",
+        "random_secret"
+      )
 ```

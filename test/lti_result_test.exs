@@ -1,5 +1,6 @@
 defmodule LTIResultTest do
   use ExUnit.Case
+  doctest LTIResult, only: [signature: 4]
 
   test "returns {:ok, determined_signature} if the signature is correct" do
     return =

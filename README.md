@@ -21,7 +21,7 @@ end
 <%
 credentials = LTI.credentials(your_given_consumer_key, your_given_consumer_secret, your_lti_url)
 oauth_params = LTI.oauth_params(credentials)
-launch_params = launch_params(@current_user_
+launch_params = launch_params(@current_user)
 %>
 
 <form id="ltiLaunchForm" name="ltiLaunchForm" method="POST" action="<%= your_lti_url %>">

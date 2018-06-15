@@ -17,11 +17,11 @@ defmodule LTIResultTest do
     return =
       LTIResult.signature(
         "http://474c3d0e.ngrok.io/capp11/api/v1/lti_results",
-        "OAuth oauth_version=\"1.0\",oauth_nonce=\"tjtwip19l78355dl\",oauth_timestamp=\"1528808890\",oauth_consumer_key=\"Defacto\",oauth_body_hash=\"qvrl3dbLTUqxHeCDqof%2Ffz%2Bygc0%3D\",oauth_signature_method=\"HMAC-SHA1\",oauth_signature=\"YVJvMx39WPP3gxWFwkbHulNjQ4I%3D\"",
+        "OAuth oauth_version=\"1.0\",oauth_nonce=\"tjtwip19l78355dl\",oauth_timestamp=\"1528808890\",oauth_consumer_key=\"Defacto\",oauth_body_hash=\"qvrl3dbLTUqxHeCDqof%2Ffz%2Bygc0%3D\",oauth_signature_method=\"HMAC-SHA1\",oauth_signature=\"WF9NUX6QCgKXNb2nNYEZ4evBmSk%3D\"",
         "random_secret"
       )
 
-    assert return == {:ok, "YVJvMx39WPP3gxWFwkbHulNjQ4I="}
+    assert return == {:ok, "WF9NUX6QCgKXNb2nNYEZ4evBmSk="}
   end
 
   test "returns an error if the signature is incorrect due to difference in key" do

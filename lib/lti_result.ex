@@ -50,7 +50,6 @@ defmodule LTIResult do
       basestring
     )
     |> Base.encode64()
-    |> percent_encode()
   end
 
   defp extract_header_elements(header) do
@@ -59,6 +58,7 @@ defmodule LTIResult do
     |> String.split(",")
     |> string_to_key_and_value()
     |> trim_elements()
+    |> decode_values()
     |> remove_realm_parameter()
     |> extract_signature()
   end
@@ -161,6 +161,12 @@ defmodule LTIResult do
     |> URI.encode(&URI.char_unreserved?/1)
   end
 
+  defp percent_decode(object) do
+    object
+    |> to_string()
+    |> URI.decode()
+  end
+
   defp string_to_key_and_value(key_value_strings) when is_list(key_value_strings) do
     Enum.map(key_value_strings, fn key_value_string ->
       [key, value] = String.split(key_value_string, "=")
@@ -171,6 +177,12 @@ defmodule LTIResult do
   defp trim_elements(pairs) when is_list(pairs) do
     Enum.map(pairs, fn {key, value} ->
       {String.trim(key), String.trim(value, "\"")}
+    end)
+  end
+
+  defp decode_values(pairs) when is_list(pairs) do
+    Enum.map(pairs, fn {key, value} ->
+      {key, percent_decode(value)}
     end)
   end
 

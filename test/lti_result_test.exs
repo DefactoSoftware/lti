@@ -10,7 +10,18 @@ defmodule LTIResultTest do
         "random_secret"
       )
 
-    assert return == {:ok, "iyyQNRQyXTlpLJPJns3ireWjQxo%3D"}
+    assert return == {:ok, "iyyQNRQyXTlpLJPJns3ireWjQxo="}
+  end
+
+  test "returns {:ok, determined_signature} if a bodyhash is included" do
+    return =
+      LTIResult.signature(
+        "http://474c3d0e.ngrok.io/capp11/api/v1/lti_results",
+        "OAuth oauth_version=\"1.0\",oauth_nonce=\"tjtwip19l78355dl\",oauth_timestamp=\"1528808890\",oauth_consumer_key=\"Defacto\",oauth_body_hash=\"qvrl3dbLTUqxHeCDqof%2Ffz%2Bygc0%3D\",oauth_signature_method=\"HMAC-SHA1\",oauth_signature=\"WF9NUX6QCgKXNb2nNYEZ4evBmSk%3D\"",
+        "random_secret"
+      )
+
+    assert return == {:ok, "WF9NUX6QCgKXNb2nNYEZ4evBmSk="}
   end
 
   test "returns an error if the signature is incorrect due to difference in key" do

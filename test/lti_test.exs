@@ -4,7 +4,13 @@ defmodule LTITest do
 
   alias LTI.{Credentials, LaunchParams, OAuthData}
 
-  @credentials %Credentials{url: "exmaple.com", secret: "secret", key: "key"}
+  @credentials %Credentials{url: "https://exmaple.com", secret: "secret", key: "key"}
+  @credentials_with_query_string %Credentials{
+    url: "https://exmaple.com?course=course1&subcourse=subcourse1",
+    secret: "secret",
+    key: "key"
+  }
+
   @oauth_credentials %OAuthData{
     oauth_callback: "about:blank",
     oauth_consumer_key: "key",
@@ -33,7 +39,7 @@ defmodule LTITest do
 
   test "launch_data/2 contains all needed params" do
     oauth_params = LTI.oauth_params(@credentials)
-    launch_data = LTI.launch_query(oauth_params, @valid_launch_params)
+    launch_data = LTI.launch_query(oauth_params, @valid_launch_params, [])
 
     assert "roles=Student" in launch_data
     assert "oauth_signature_method=HMAC-SHA1" in launch_data
@@ -41,7 +47,12 @@ defmodule LTITest do
 
   test "signature/3 encodes all the variables " do
     assert LTI.signature(@credentials, @oauth_credentials, @valid_launch_params) ==
-             "wtNANlPNBFKlB7oI1y75HL1aFrA="
+             "FmlHij11a+wcY4XPmjyRrPGNELg="
+  end
+
+  test "signature/3 with url with query string parameters" do
+    assert LTI.signature(@credentials_with_query_string, @oauth_credentials, @valid_launch_params) ==
+             "+mKFClgWnaHtsQByWMRCFxR8P44="
   end
 
   test "oauth_params/1 should always be different" do

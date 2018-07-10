@@ -23,17 +23,6 @@ defmodule LTI do
     struct_to_list(launch_params) ++ struct_to_list(oauth)
   end
 
-  def launch_query(%OAuthData{} = oauth, %LaunchParams{} = launch_params) do
-    oauth
-    |> launch_data(launch_params)
-    |> Enum.reduce(%{}, fn {key, value}, acc ->
-      Map.put(acc, key, value)
-    end)
-    |> Enum.reduce([], fn {key, value}, acc ->
-      acc ++ ["#{key}=#{percent_encode(value)}"]
-    end)
-  end
-
   def signature(
         %Credentials{secret: secret} = creds,
         %OAuthData{} = oauth_params,
@@ -52,13 +41,46 @@ defmodule LTI do
   end
 
   defp base_string(%Credentials{url: url}, oauth_params, launch_params) do
+    {normalized_url, query} = parse_url(url)
+    query_params = to_query_params(query)
+
     query =
       oauth_params
-      |> launch_query(launch_params)
+      |> launch_query(launch_params, query_params)
       |> Enum.join("&")
       |> percent_encode()
 
-    "POST&#{percent_encode(url)}&#{query}"
+    "POST&#{percent_encode(normalized_url)}&#{query}"
+  end
+
+  def launch_query(%OAuthData{} = oauth, %LaunchParams{} = launch_params, query_string_params) do
+    parameters = launch_data(oauth, launch_params) ++ query_string_params
+
+    parameters
+    |> Enum.reduce(%{}, fn {key, value}, acc ->
+      Map.put(acc, key, value)
+    end)
+    |> Enum.reduce([], fn {key, value}, acc ->
+      acc ++ ["#{key}=#{percent_encode(value)}"]
+    end)
+  end
+
+  defp parse_url(url) do
+    %URI{scheme: scheme, authority: authority, path: path, query: query} = URI.parse(url)
+    normalized_url = "#{scheme}://#{authority}#{path}"
+    {normalized_url, query}
+  end
+
+  defp to_query_params(nil), do: []
+
+  defp to_query_params(query) do
+    query
+    |> String.split("&")
+    |> Enum.map(fn pair ->
+      [key, value] = String.split(pair, "=")
+      {String.to_atom(key), value}
+    end)
+    |> Keyword.new()
   end
 
   defp timestamp do

@@ -20,7 +20,7 @@ defmodule LTITest do
     oauth_signature_method: "HMAC-SHA1"
   }
 
-  @valid_launch_params %LTI.LaunchParams{
+  @valid_launch_params %LaunchParams{
     context_id: "456434513",
     launch_presentation_locale: "en",
     launch_presentation_return_url: "url",
@@ -36,14 +36,6 @@ defmodule LTITest do
     tool_consumer_instance_guid: "lmsng.school.edu",
     user_id: 1234
   }
-
-  test "launch_data/2 contains all needed params" do
-    oauth_params = LTI.oauth_params(@credentials)
-    launch_data = LTI.launch_query(oauth_params, @valid_launch_params, [])
-
-    assert "roles=Student" in launch_data
-    assert "oauth_signature_method=HMAC-SHA1" in launch_data
-  end
 
   test "signature/3 encodes all the variables " do
     assert LTI.signature(@credentials, @oauth_credentials, @valid_launch_params) ==

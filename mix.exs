@@ -6,7 +6,7 @@ defmodule LTI.Mixfile do
       app: :lti,
       deps: deps(),
       description: description(),
-      elixir: "~> 1.5",
+      elixir: "~> 1.8",
       name: "LTI",
       package: package(),
       elixirc_paths: ["lib"],

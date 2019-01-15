@@ -37,7 +37,7 @@ defmodule LTI.Mixfile do
 
   defp deps do
     [
-      {:credo, "~> 0.8", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: [:dev, :test]}
     ]
   end

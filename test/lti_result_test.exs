@@ -13,6 +13,24 @@ defmodule LTIResultTest do
     assert return == {:ok, "iyyQNRQyXTlpLJPJns3ireWjQxo="}
   end
 
+  test "returns identical signatures for downcase url and url with capitals" do
+    return1 =
+      LTIResult.signature(
+        "https://example.com",
+        "OAuth oauth_consumer_key=\"key1234\",oauth_signature_method=\"HMAC-SHA1\",oauth_timestamp=\"1525076552\",oauth_nonce=\"123\",oauth_version=\"1.0\",oauth_signature=\"iyyQNRQyXTlpLJPJns3ireWjQxo%3D\"",
+        "random_secret"
+      )
+
+    return2 =
+      LTIResult.signature(
+        "https://ExamPle.com",
+        "OAuth oauth_consumer_key=\"key1234\",oauth_signature_method=\"HMAC-SHA1\",oauth_timestamp=\"1525076552\",oauth_nonce=\"123\",oauth_version=\"1.0\",oauth_signature=\"iyyQNRQyXTlpLJPJns3ireWjQxo%3D\"",
+        "random_secret"
+      )
+
+    assert return1 == return2
+  end
+
   test "returns {:ok, determined_signature} if a bodyhash is included" do
     return =
       LTIResult.signature(

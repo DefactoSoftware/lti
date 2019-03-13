@@ -4,9 +4,14 @@ defmodule LTITest do
 
   alias LTI.{Credentials, LaunchParams, OAuthData}
 
-  @credentials %Credentials{url: "https://exmaple.com", secret: "secret", key: "key"}
+  @credentials %Credentials{url: "https://example.com", secret: "secret", key: "key"}
   @credentials_with_query_string %Credentials{
-    url: "https://exmaple.com?course=course1&subcourse=subcourse1",
+    url: "https://example.com?course=course1&subcourse=subcourse1",
+    secret: "secret",
+    key: "key"
+  }
+  @credentials_with_capitalized_url %Credentials{
+    url: "https://ExamPle.com",
     secret: "secret",
     key: "key"
   }
@@ -45,14 +50,23 @@ defmodule LTITest do
     assert "oauth_signature_method=HMAC-SHA1" in launch_data
   end
 
-  test "signature/3 encodes all the variables " do
+  test "signature/3 encodes all the variables" do
     assert LTI.signature(@credentials, @oauth_credentials, @valid_launch_params) ==
-             "FmlHij11a+wcY4XPmjyRrPGNELg="
+             "NgK2X7WQb+CwHikcJMjqnJTsSBk="
+  end
+
+  test "signature/3 encodes all the variables, with url with capitals" do
+    assert LTI.signature(
+             @credentials_with_capitalized_url,
+             @oauth_credentials,
+             @valid_launch_params
+           ) ==
+             "NgK2X7WQb+CwHikcJMjqnJTsSBk="
   end
 
   test "signature/3 with url with query string parameters" do
     assert LTI.signature(@credentials_with_query_string, @oauth_credentials, @valid_launch_params) ==
-             "+mKFClgWnaHtsQByWMRCFxR8P44="
+             "68JVqL7aRC1meflszD8p+onIvWI="
   end
 
   test "oauth_params/1 should always be different" do

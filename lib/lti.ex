@@ -77,11 +77,18 @@ defmodule LTI do
   defp to_query_params(query) do
     query
     |> String.split("&")
-    |> Enum.map(fn pair ->
-      [key, value] = String.split(pair, "=")
-      {String.to_atom(key), value}
-    end)
+    |> Enum.map(&to_pairs/1)
     |> Keyword.new()
+  end
+
+  defp to_pairs(pair) do
+    pair
+    |> String.split("=")
+    |> get_pairs
+  end
+
+  defp get_pairs([key, value | _]) do
+    {String.to_atom(key), value}
   end
 
   defp timestamp do

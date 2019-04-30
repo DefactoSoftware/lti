@@ -12,7 +12,7 @@ defmodule LTI.Mixfile do
       elixirc_paths: ["lib"],
       source_url: "https://github.com/defactosoftware/lti",
       start_permanent: true,
-      version: "0.1.2"
+      version: "0.1.3"
     ]
   end
 
@@ -38,7 +38,7 @@ defmodule LTI.Mixfile do
   defp deps do
     [
       {:credo, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:ex_doc, ">= 0.0.0", only: [:dev, :test]}
+      {:ex_doc, ">= 0.0.0", only: [:dev, :test], runtime: false}
     ]
   end
 end

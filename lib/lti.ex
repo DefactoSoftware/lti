@@ -87,8 +87,8 @@ defmodule LTI do
     |> get_pairs
   end
 
-  defp get_pairs([key, value | _]) do
-    {String.to_atom(key), value}
+  defp get_pairs([key | values]) do
+    {String.to_atom(key), Enum.join(values, "=")}
   end
 
   defp timestamp do

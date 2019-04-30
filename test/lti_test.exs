@@ -2,11 +2,16 @@ defmodule LTITest do
   use ExUnit.Case
   doctest LTI
 
-  alias LTI.{Credentials, LaunchParams, OAuthData}
+  alias LTI.{Credentials, OAuthData}
 
   @credentials %Credentials{url: "https://example.com", secret: "secret", key: "key"}
   @credentials_with_query_string %Credentials{
     url: "https://example.com?course=course1&subcourse=subcourse1",
+    secret: "secret",
+    key: "key"
+  }
+  @credentials_with_nested_query_string %Credentials{
+    url: "https://example.com?course=course1&redirect_uri=https://example.com/index.html?page=5",
     secret: "secret",
     key: "key"
   }
@@ -67,6 +72,14 @@ defmodule LTITest do
   test "signature/3 with url with query string parameters" do
     assert LTI.signature(@credentials_with_query_string, @oauth_credentials, @valid_launch_params) ==
              "68JVqL7aRC1meflszD8p+onIvWI="
+  end
+
+  test "signature/3 with url with query string with nested query parameters" do
+    assert LTI.signature(
+             @credentials_with_nested_query_string,
+             @oauth_credentials,
+             @valid_launch_params
+           ) == "f/DC8AEzcDcMUPs07nc0tPG8/CM="
   end
 
   test "oauth_params/1 should always be different" do

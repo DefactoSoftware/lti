@@ -65,11 +65,18 @@ defmodule LTI do
     end)
   end
 
-  defp normalize(url) do
-    %URI{query: query} = uri = URI.parse(url)
+  def downcase_scheme_and_host(%URI{scheme: scheme, host: host} = uri),
+    do: %URI{uri | scheme: String.downcase(scheme), host: String.downcase(host)}
 
-    {URI.to_string(uri), query}
+  defp normalize(url) do
+    url
+    |> URI.parse()
+    |> downcase_scheme_and_host()
+    |> split_query_params()
   end
+
+  defp split_query_params(%URI{query: query} = uri),
+    do: {URI.to_string(%URI{uri | query: nil}), query}
 
   defp to_query_params(nil), do: []
 

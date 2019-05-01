@@ -41,7 +41,7 @@ defmodule LTI do
   end
 
   defp base_string(%Credentials{url: url}, oauth_params, launch_params) do
-    {normalized_url, query} = parse_url(url)
+    {normalized_url, query} = normalize(url)
     query_params = to_query_params(query)
 
     query =
@@ -65,11 +65,10 @@ defmodule LTI do
     end)
   end
 
-  defp parse_url(url) do
-    %URI{scheme: scheme, authority: authority, path: path, query: query} = URI.parse(url)
-    # normalized_url = String.downcase("#{scheme}://#{authority}#{path}")
+  defp normalize(url) do
+    %URI{query: query} = uri = URI.parse(url)
 
-    {"#{scheme}://#{authority}#{path}", query}
+    {URI.to_string(uri), query}
   end
 
   defp to_query_params(nil), do: []

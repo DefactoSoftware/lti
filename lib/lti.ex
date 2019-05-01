@@ -67,9 +67,9 @@ defmodule LTI do
 
   defp parse_url(url) do
     %URI{scheme: scheme, authority: authority, path: path, query: query} = URI.parse(url)
-    normalized_url = String.downcase("#{scheme}://#{authority}#{path}")
+    # normalized_url = String.downcase("#{scheme}://#{authority}#{path}")
 
-    {normalized_url, query}
+    {"#{scheme}://#{authority}#{path}", query}
   end
 
   defp to_query_params(nil), do: []

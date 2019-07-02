@@ -129,7 +129,12 @@ defmodule LTIResult do
   end
 
   defp base_string(url, parameters) do
-    encoded_url = url |> String.downcase() |> percent_encode()
+    encoded_url =
+      url
+      |> URI.parse()
+      |> LTI.downcase_scheme_and_host()
+      |> URI.to_string()
+      |> percent_encode()
 
     query_string =
       parameters

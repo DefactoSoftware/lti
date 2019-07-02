@@ -187,7 +187,7 @@ defmodule LTIResult do
   end
 
   defp extract_signature(pairs) do
-    Enum.split(pairs, -1)
+    Enum.split_with(pairs, fn {param_name, _} -> param_name != "oauth_signature" end)
   end
 
   defp remove_realm_parameter(pairs) when is_list(pairs) do

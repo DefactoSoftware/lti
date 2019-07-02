@@ -13,6 +13,17 @@ defmodule LTIResultTest do
     assert return == {:ok, "iyyQNRQyXTlpLJPJns3ireWjQxo="}
   end
 
+  test "returns {:ok, determined_signature} regardless of the position of the signature in the oauth header" do
+    return =
+      LTIResult.signature(
+        "https://example.com",
+        "OAuth oauth_consumer_key=\"key1234\",oauth_signature_method=\"HMAC-SHA1\",oauth_signature=\"iyyQNRQyXTlpLJPJns3ireWjQxo%3D\",oauth_timestamp=\"1525076552\",oauth_nonce=\"123\",oauth_version=\"1.0\"",
+        "random_secret"
+      )
+
+    assert return == {:ok, "iyyQNRQyXTlpLJPJns3ireWjQxo="}
+  end
+
   test "returns identical signatures for downcase url and url with capitals" do
     return1 =
       LTIResult.signature(

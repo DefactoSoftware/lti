@@ -57,12 +57,8 @@ defmodule LTI do
     parameters = launch_data(oauth, launch_params) ++ query_string_params
 
     parameters
-    |> Enum.reduce(%{}, fn {key, value}, acc ->
-      Map.put(acc, key, value)
-    end)
-    |> Enum.reduce([], fn {key, value}, acc ->
-      acc ++ ["#{key}=#{percent_encode(value)}"]
-    end)
+    |> Enum.map(fn {key, value} -> "#{key}=#{percent_encode(value)}" end)
+    |> Enum.sort()
   end
 
   def downcase_scheme_and_host(%URI{scheme: scheme, host: host} = uri),
@@ -84,7 +80,7 @@ defmodule LTI do
     query
     |> String.split("&")
     |> Enum.map(&to_pairs/1)
-    |> Keyword.new()
+    |> Enum.into([])
   end
 
   defp to_pairs(pair) do
@@ -94,7 +90,7 @@ defmodule LTI do
   end
 
   defp get_pairs([key | values]) do
-    {String.to_atom(key), Enum.join(values, "=")}
+    {key, Enum.join(values, "=")}
   end
 
   defp timestamp do
@@ -117,15 +113,7 @@ defmodule LTI do
       struct
       |> Map.from_struct()
       |> Map.to_list()
-      |> strip_nil()
-
-  defp strip_nil(list) do
-    Enum.reduce(list, [], fn {_, value} = item, acc ->
-      if is_nil(value),
-        do: acc,
-        else: acc ++ [item]
-    end)
-  end
+      |> Enum.reject(fn {_, v} -> is_nil(v) end)
 
   defp nonce do
     24

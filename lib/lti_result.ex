@@ -27,30 +27,40 @@ defmodule LTIResult do
       {:ok, "iyyQNRQyXTlpLJPJns3ireWjQxo%3D"}
   """
   def signature(url, oauth_header, secret) do
-    {parameters, [{"oauth_signature", received_signature}]} =
-      extract_header_elements(oauth_header)
+    with {parameters, [{"oauth_signature", received_signature}]} <-
+           extract_header_elements(oauth_header),
+         {:ok, _} <- validate_parameters(parameters),
+         {_, signature_method} <-
+           List.keyfind(
+             parameters,
+             "oauth_signature_method",
+             0,
+             {"oauth_signature_method", "HMAC-SHA1"}
+           ),
+         basestring <- base_string(url, parameters),
+         signature <- generate_signature(secret, signature_method, basestring) do
+      case signature == received_signature do
+        true ->
+          {:ok, signature}
 
-    with {:ok, _} <- validate_parameters(parameters) do
-      basestring = base_string(url, parameters)
-
-      signature = generate_signature(secret, basestring)
-
-      if signature == received_signature do
-        {:ok, signature}
-      else
-        {:error, [:unmatching_signatures]}
+        false ->
+          {:error, [:unmatching_signatures]}
       end
     end
   end
 
-  defp generate_signature(secret, basestring) do
-    :sha
+  defp generate_signature(secret, signature_method, basestring) do
+    signature_method
+    |> get_signature_method()
     |> LTI.hmac_fun(
       percent_encode(secret) <> "&",
       basestring
     )
     |> Base.encode64()
   end
+
+  defp get_signature_method("HMAC-SHA256"), do: :sha256
+  defp get_signature_method(_), do: :sha
 
   defp extract_header_elements(header) do
     header

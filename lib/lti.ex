@@ -15,7 +15,7 @@ defmodule LTI do
       oauth_version: "1.0",
       oauth_nonce: nonce(),
       oauth_timestamp: timestamp(),
-      oauth_signature_method: "HMAC-SHA1"
+      oauth_signature_method: "HMAC-SHA256"
     }
   end
 
@@ -28,7 +28,7 @@ defmodule LTI do
         %OAuthData{} = oauth_params,
         %LaunchParams{} = launch_params
       ) do
-    :sha
+    :sha256
     |> hmac_fun(
       encode_secret(secret),
       base_string(creds, oauth_params, launch_params)

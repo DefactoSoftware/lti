@@ -29,7 +29,7 @@ defmodule LTI do
         %LaunchParams{} = launch_params
       ) do
     :sha
-    |> :crypto.hmac(
+    |> hmac_fun(
       encode_secret(secret),
       base_string(creds, oauth_params, launch_params)
     )
@@ -119,5 +119,11 @@ defmodule LTI do
     24
     |> :crypto.strong_rand_bytes()
     |> Base.encode64()
+  end
+
+  if Code.ensure_loaded?(:crypto) and function_exported?(:crypto, :mac, 4) do
+    def hmac_fun(digest, key, data), do: :crypto.mac(:hmac, digest, key, data)
+  else
+    def hmac_fun(digest, key, data), do: :crypto.hmac(digest, key, data)
   end
 end

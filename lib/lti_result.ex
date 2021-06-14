@@ -45,7 +45,7 @@ defmodule LTIResult do
 
   defp generate_signature(secret, basestring) do
     :sha
-    |> :crypto.hmac(
+    |> LTI.hmac_fun(
       percent_encode(secret) <> "&",
       basestring
     )

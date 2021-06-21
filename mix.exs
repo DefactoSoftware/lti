@@ -12,7 +12,7 @@ defmodule LTI.Mixfile do
       elixirc_paths: ["lib"],
       source_url: "https://github.com/defactosoftware/lti",
       start_permanent: true,
-      version: "0.1.4"
+      version: "0.1.5"
     ]
   end
 

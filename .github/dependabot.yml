@@ -3,13 +3,8 @@ updates:
 - package-ecosystem: mix
   directory: "/"
   schedule:
-    interval: daily
+    interval: weekly
     time: "04:00"
   pull-request-branch-name:
     separator: "-"
   open-pull-requests-limit: 10
-  ignore:
-  - dependency-name: ex_doc
-    versions:
-    - 0.24.0
-    - 0.24.1

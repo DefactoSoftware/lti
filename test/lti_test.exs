@@ -27,7 +27,7 @@ defmodule LTITest do
     oauth_version: "1.0",
     oauth_nonce: "nonce",
     oauth_timestamp: "timestamp",
-    oauth_signature_method: "HMAC-SHA1"
+    oauth_signature_method: "HMAC-SHA256"
   }
 
   @valid_launch_params %LTI.LaunchParams{
@@ -52,12 +52,12 @@ defmodule LTITest do
     launch_data = LTI.launch_query(oauth_params, @valid_launch_params, [])
 
     assert "roles=Student" in launch_data
-    assert "oauth_signature_method=HMAC-SHA1" in launch_data
+    assert "oauth_signature_method=HMAC-SHA256" in launch_data
   end
 
   test "signature/3 encodes all the variables" do
     assert LTI.signature(@credentials, @oauth_credentials, @valid_launch_params) ==
-             "NgK2X7WQb+CwHikcJMjqnJTsSBk="
+             "709pOpaAubqFMg2w3dPgNj5psL2NKr+of14tl3dYC2c="
   end
 
   test "signature/3 encodes all the variables, with url with capitals" do
@@ -66,12 +66,12 @@ defmodule LTITest do
              @oauth_credentials,
              @valid_launch_params
            ) ==
-             "NgK2X7WQb+CwHikcJMjqnJTsSBk="
+             "709pOpaAubqFMg2w3dPgNj5psL2NKr+of14tl3dYC2c="
   end
 
   test "signature/3 with url with query string parameters" do
     assert LTI.signature(@credentials_with_query_string, @oauth_credentials, @valid_launch_params) ==
-             "68JVqL7aRC1meflszD8p+onIvWI="
+             "LzQhP77ayGyHsS7RnRLzHuLd56Oy1+iL1h9HY2tyGmk="
   end
 
   test "signature/3 with url with query string with nested query parameters" do
@@ -79,7 +79,7 @@ defmodule LTITest do
              @credentials_with_nested_query_string,
              @oauth_credentials,
              @valid_launch_params
-           ) == "f/DC8AEzcDcMUPs07nc0tPG8/CM="
+           ) == "AUU3pCgwluS7tRBLRCGnXeoY9MK2NCX+P5VpofkIgE0="
   end
 
   test "oauth_params/1 should always be different" do

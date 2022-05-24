@@ -17,6 +17,7 @@ defmodule LTI.LaunchParams do
     :context_id,
     :context_label,
     :context_title,
+    :context_type,
     :launch_presentation_css_url,
     :launch_presentation_document_target,
     :launch_presentation_locale,
@@ -38,7 +39,6 @@ defmodule LTI.LaunchParams do
     :tool_consumer_info_version,
     :tool_consumer_instance_description,
     :tool_consumer_instance_guid,
-    :user_id,
-    :submit
+    :tool_consumer_instance_name
   ]
 end

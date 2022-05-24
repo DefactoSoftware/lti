@@ -42,7 +42,6 @@ defmodule LTITest do
     resource_link_id: "120988f929-274612",
     resource_link_title: "onno schuit",
     roles: "Student",
-    submit: "Launch",
     tool_consumer_instance_guid: "lmsng.school.edu",
     user_id: 1234
   }

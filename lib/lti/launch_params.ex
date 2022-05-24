@@ -39,6 +39,7 @@ defmodule LTI.LaunchParams do
     :tool_consumer_info_version,
     :tool_consumer_instance_description,
     :tool_consumer_instance_guid,
-    :tool_consumer_instance_name
+    :tool_consumer_instance_name,
+    :user_id
   ]
 end

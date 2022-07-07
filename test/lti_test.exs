@@ -4,19 +4,19 @@ defmodule LTITest do
 
   alias LTI.{Credentials, OAuthData}
 
-  @credentials %Credentials{url: "https://example.com", secret: "secret", key: "key"}
+  @credentials %Credentials{url: "https://example.com/lti", secret: "secret", key: "key"}
   @credentials_with_query_string %Credentials{
-    url: "https://example.com?course=course1&subcourse=subcourse1",
+    url: "https://example.com/lti?course=course1&subcourse=subcourse1",
     secret: "secret",
     key: "key"
   }
   @credentials_with_nested_query_string %Credentials{
-    url: "https://example.com?course=course1&redirect_uri=https://example.com/index.html?page=5",
+    url: "https://example.com/lti?course=course1&redirect_uri=https://example.com/index.html?page=5",
     secret: "secret",
     key: "key"
   }
   @credentials_with_capitalized_url %Credentials{
-    url: "https://ExamPle.com",
+    url: "https://ExamPle.com/LTI",
     secret: "secret",
     key: "key"
   }
@@ -56,7 +56,7 @@ defmodule LTITest do
 
   test "signature/3 encodes all the variables" do
     assert LTI.signature(@credentials, @oauth_credentials, @valid_launch_params) ==
-             "NgK2X7WQb+CwHikcJMjqnJTsSBk="
+             "oZ+tKsx1XXcv6T7TEkgh9Z98iKQ="
   end
 
   test "signature/3 encodes all the variables, with url with capitals" do
@@ -65,12 +65,12 @@ defmodule LTITest do
              @oauth_credentials,
              @valid_launch_params
            ) ==
-             "NgK2X7WQb+CwHikcJMjqnJTsSBk="
+             "847zmolnYszuzzIS5T1OFNpQST0="
   end
 
   test "signature/3 with url with query string parameters" do
     assert LTI.signature(@credentials_with_query_string, @oauth_credentials, @valid_launch_params) ==
-             "68JVqL7aRC1meflszD8p+onIvWI="
+             "qAabG+64siAP8WUeK8ulvE9+9dA="
   end
 
   test "signature/3 with url with query string with nested query parameters" do
@@ -78,7 +78,7 @@ defmodule LTITest do
              @credentials_with_nested_query_string,
              @oauth_credentials,
              @valid_launch_params
-           ) == "f/DC8AEzcDcMUPs07nc0tPG8/CM="
+           ) == "zKnEO+SDt++bRcZdFu0ef5H2H8M="
   end
 
   test "oauth_params/1 should always be different" do

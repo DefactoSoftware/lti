@@ -5,7 +5,6 @@ defmodule LTI.LaunchParams do
   @enforce_keys [
     :context_id,
     :launch_presentation_locale,
-    :launch_presentation_return_url,
     :resource_link_id,
     :roles,
     :user_id,

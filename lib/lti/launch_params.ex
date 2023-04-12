@@ -20,8 +20,10 @@ defmodule LTI.LaunchParams do
     :context_type,
     :launch_presentation_css_url,
     :launch_presentation_document_target,
+    :launch_presentation_height,
     :launch_presentation_locale,
     :launch_presentation_return_url,
+    :launch_presentation_width,
     :lis_outcome_service_url,
     :lis_person_contact_email_primary,
     :lis_person_name_family,
@@ -34,12 +36,16 @@ defmodule LTI.LaunchParams do
     :resource_link_description,
     :resource_link_id,
     :resource_link_title,
+    :role_scope_mentor,
     :roles,
     :tool_consumer_info_product_family_code,
     :tool_consumer_info_version,
+    :tool_consumer_instance_contact_email,
     :tool_consumer_instance_description,
     :tool_consumer_instance_guid,
     :tool_consumer_instance_name,
-    :user_id
+    :tool_consumer_instance_url,
+    :user_id,
+    :user_image
   ]
 end
